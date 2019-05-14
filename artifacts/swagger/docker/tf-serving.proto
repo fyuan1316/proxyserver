@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package tensorflow.serving;
+option cc_enable_arenas = true;
+import "tensorflow_serving/apis/model_management.proto";
+import "tensorflow_serving/apis/get_model_status.proto";
+
+import "tensorflow_serving/apis/classification.proto";
+import "tensorflow_serving/apis/get_model_metadata.proto";
+import "tensorflow_serving/apis/inference.proto";
+import "tensorflow_serving/apis/predict.proto";
+import "tensorflow_serving/apis/regression.proto";
+import "google/api/annotations.proto";
+
+
+// open source marker; do not remove
+// PredictionService provides access to machine-learned models loaded by
+// model_servers.
+
+service ModelService {
+  // Gets status of model. If the ModelSpec in the request does not specify
+  // version, information about all versions of the model will be returned. If
+  // the ModelSpec in the request does specify a version, the status of only
+  // that version will be returned.
+  rpc GetModelStatus(GetModelStatusRequest) returns (GetModelStatusResponse){
+      option (google.api.http) = {
+       get: "/alauda/v1/models/MODEL_NAME"
+     };
+  };
+
+  // Reloads the set of served models. The new config supersedes the old one,
+  // so if a model is omitted from the new config it will be unloaded and no
+  // longer served.
+  rpc HandleReloadConfigRequest(ReloadConfigRequest)
+      returns (ReloadConfigResponse);
+}
+
+service PredictionService {
+  // Classify.
+  rpc Classify(ClassificationRequest) returns (ClassificationResponse) {
+    option (google.api.http) = {
+       post: "/alauda/v1/models/MODEL_NAME:classify"
+       body: "*"
+     };
+  }
+
+  // Regress.
+  rpc Regress(RegressionRequest) returns (RegressionResponse) {
+    option (google.api.http) = {
+       post: "/alauda/v1/models/MODEL_NAME:regress"
+       body: "*"
+     };
+  };
+
+  // Predict -- provides access to loaded TensorFlow model.
+  rpc Predict(PredictRequest) returns (PredictResponse) {
+    option (google.api.http) = {
+       post: "/alauda/v1/models/MODEL_NAME:predict"
+       body: "*"
+     };
+  };
+/*
+  // MultiInference API for multi-headed models.
+  rpc MultiInference(MultiInferenceRequest) returns (MultiInferenceResponse) {
+    option (google.api.http) = {
+       post: "/alauda/v1/models/multi-inference"
+       body: "*"
+     };
+  };
+*/
+  // GetModelMetadata - provides access to metadata for loaded models.
+  rpc GetModelMetadata(GetModelMetadataRequest)
+      returns (GetModelMetadataResponse) {
+    option (google.api.http) = {
+       get: "/alauda/v1/models/MODEL_NAME/metadata"
+     };
+  };
+
+}
